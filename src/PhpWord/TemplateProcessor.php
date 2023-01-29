@@ -242,7 +242,7 @@ class TemplateProcessor
      */
     protected static function ensureMacroCompleted($macro)
     {
-        if (substr($macro, 0, 2) !== self::$macroOpeningChars && substr($macro, -1) !== self::$macroClosingChars) {
+        if (substr($macro, 0, 1) !== self::$macroOpeningChars && substr($macro, -1) !== self::$macroClosingChars) {
             $macro = self::$macroOpeningChars . $macro . self::$macroClosingChars;
         }
 
