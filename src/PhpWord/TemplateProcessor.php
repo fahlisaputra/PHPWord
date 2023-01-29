@@ -94,9 +94,9 @@ class TemplateProcessor
      */
     protected $tempDocumentNewImages = [];
 
-    protected static $macroOpeningChars = '${';
+    protected static $macroOpeningChars = '[';
 
-    protected static $macroClosingChars = '}';
+    protected static $macroClosingChars = ']';
 
     /**
      * @since 0.12.0 Throws CreateTemporaryFileException and CopyFileException instead of Exception
