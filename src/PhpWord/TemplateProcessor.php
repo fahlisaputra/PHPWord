@@ -338,7 +338,7 @@ class TemplateProcessor
             $replace = $xmlEscaper->escape($replace);
         }
 
-        $this->tempDocumentHeaders = $this->setValueForPart($search, $replace, $this->tempDocumentHeaders, $limit);
+        //$this->tempDocumentHeaders = $this->setValueForPart($search, $replace, $this->tempDocumentHeaders, $limit);
         $this->tempDocumentMainPart = $this->setValueForPart($search, $replace, $this->tempDocumentMainPart, $limit);
         $this->tempDocumentFooters = $this->setValueForPart($search, $replace, $this->tempDocumentFooters, $limit);
     }
@@ -661,7 +661,7 @@ class TemplateProcessor
                     if (preg_match('/(<[^<]+>)([^<]*)(' . preg_quote($varNameWithArgsFixed) . ')([^>]*)(<[^>]+>)/Uu', $partContent, $matches)) {
                         $wholeTag = $matches[0];
                         array_shift($matches);
-                        [$openTag, $prefix, , $postfix, $closeTag] = $matches;
+                        [$openTag, $prefix,, $postfix, $closeTag] = $matches;
                         $replaceXml = $openTag . $prefix . $closeTag . $xmlImage . $openTag . $postfix . $closeTag;
                         // replace on each iteration, because in one tag we can have 2+ inline variables => before proceed next variable we need to change $partContent
                         $partContent = $this->setValueForPart($wholeTag, $replaceXml, $partContent, $limit);
@@ -745,7 +745,8 @@ class TemplateProcessor
 
                 // If tmpXmlRow doesn't contain continue, this row is no longer part of the spanned row.
                 $tmpXmlRow = $this->getSlice($extraRowStart, $extraRowEnd);
-                if (!preg_match('#<w:vMerge/>#', $tmpXmlRow) &&
+                if (
+                    !preg_match('#<w:vMerge/>#', $tmpXmlRow) &&
                     !preg_match('#<w:vMerge w:val="continue"\s*/>#', $tmpXmlRow)
                 ) {
                     break;
@@ -807,7 +808,8 @@ class TemplateProcessor
 
                 // If tmpXmlRow doesn't contain continue, this row is no longer part of the spanned row.
                 $tmpXmlRow = $this->getSlice($extraRowStart, $extraRowEnd);
-                if (!preg_match('#<w:vMerge/>#', $tmpXmlRow) &&
+                if (
+                    !preg_match('#<w:vMerge/>#', $tmpXmlRow) &&
                     !preg_match('#<w:vMerge w:val="continue" />#', $tmpXmlRow)
                 ) {
                     break;
@@ -1023,17 +1025,18 @@ class TemplateProcessor
      */
     protected function fixBrokenMacros($documentPart)
     {
-        $brokenMacroOpeningChars = substr(self::$macroOpeningChars, 0, 1);
-        $endMacroOpeningChars = substr(self::$macroOpeningChars, 1);
-        $macroClosingChars = self::$macroClosingChars;
+        $fixedDocumentPart = $documentPart;
 
-        return preg_replace_callback(
-            '/\\' . $brokenMacroOpeningChars . '(?:\\' . $endMacroOpeningChars . '|[^{$]*\>\{)[^' . $macroClosingChars . '$]*\}/U',
+        $fixedDocumentPart = preg_replace_callback(
+            '/(?:\[|[^{$]*\>\{)[^]$]*\]/U',
             function ($match) {
-                return strip_tags($match[0]);
+                $ret = strip_tags($match[0]);
+                return $ret;
             },
-            $documentPart
+            $fixedDocumentPart
         );
+
+        return $fixedDocumentPart;
     }
 
     /**
